@@ -16,30 +16,16 @@ class Competition(BaseModel):
         ordering = ["-deadline"]
 
     def __str__(self):
-        return f"{self.title} (до {self.deadline:%d.%m.%Y})"
+        return f"{self.title}"
 
-
-class Child(BaseModel):
-    parent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="children")
-    name = models.CharField(max_length=255, verbose_name=_("Child Name"))
-    birth_date = models.DateField(verbose_name=_("Birth Date"))
-
-    def __str__(self):
-        return self.name
 
 
 class Application(BaseModel):
     parent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="applications")
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE, related_name="applications")
-    children = models.ManyToManyField("Child", related_name="applications")
+    children = models.ManyToManyField("children.Children", related_name="applications")
     physical_certificate = models.BooleanField(default=False)
-    payment_method = models.CharField(
-        max_length=20,
-        choices=[("payme", "Payme"), ("click", "Click")],
-        null=True,
-        blank=True
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
+    payment_method = models.CharField(max_length=20, choices=[("payme", "Payme"), ("click", "Click")], null=True, blank=True)
 
     def __str__(self):
         return f"{self.parent} → {self.competition}"

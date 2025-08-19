@@ -27,6 +27,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = "authentication.User"
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    )
+}
+
+
 
 # Application definition
 
@@ -41,6 +51,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'home',
     'competition',
+    'authentication',
+    'children',
 ]
 
 MIDDLEWARE = [

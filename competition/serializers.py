@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from .models import Competition, Child, Application
+from .models import Competition, Application
 from home.models import Title
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
-
+from children.models import Children
 
 class TitleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,18 +30,26 @@ class CompetitionSerializer(serializers.ModelSerializer):
 
 
 
-class ChildSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Child
-        fields = ["id", "name", "birth_date"]
-
-
-
 class ApplicationSerializer(serializers.ModelSerializer):
     children = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Child.objects.all()
+        many=True,
+        queryset=Children.objects.none()
     )
 
     class Meta:
         model = Application
-        fields = ["id", "competition", "children", "physical_certificate", "payment_method"]
+        fields = ['id', 'competition', 'children', 'physical_certificate', 'payment_method']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        user = self.context['request'].user
+        self.fields['children'].queryset = Children.objects.filter(parent=user)
+
+    def create(self, validated_data):
+        children = validated_data.pop('children', [])
+        application = Application.objects.create(
+            parent=self.context['request'].user,  # привязываем текущего родителя
+            **validated_data
+        )
+        application.children.set(children)
+        return application
