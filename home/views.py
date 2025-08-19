@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from .serializers import HeaderSerializer
 from drf_yasg.utils import swagger_auto_schema
-from django.utils.translation import gettext_lazy as _
+from .models import Header
 
 
 class HomeViewSet(ViewSet):
