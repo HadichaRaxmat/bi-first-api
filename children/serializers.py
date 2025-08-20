@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import AddChildren
+from .models import Children
 
 
-class AddChildrenSerializer(serializers.ModelSerializer):
+class ChildrenSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AddChildren
+        model = Children
         fields = [
             "id",
             "first_name",

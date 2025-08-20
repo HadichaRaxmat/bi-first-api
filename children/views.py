@@ -2,31 +2,31 @@ from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
-from .models import AddChildren
-from .serializers import AddChildrenSerializer
+from .models import Children
+from .serializers import ChildrenSerializer
 
 
-class AddChildrenViewSet(viewsets.ViewSet):
+class ChildrenViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Список детей текущего пользователя",
-        responses={200: AddChildrenSerializer(many=True)},
+        responses={200: ChildrenSerializer(many=True)},
         tags=["children"]
     )
     def list(self, request):
-        children = AddChildren.objects.filter(parent=request.user)
-        serializer = AddChildrenSerializer(children, many=True)
+        children = Children.objects.filter(parent=request.user)
+        serializer = ChildrenSerializer(children, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_description="Добавить ребёнка",
-        request_body=AddChildrenSerializer,
-        responses={201: AddChildrenSerializer()},
+        request_body=ChildrenSerializer,
+        responses={201: ChildrenSerializer()},
         tags=["children"]
     )
     def create(self, request):
-        serializer = AddChildrenSerializer(data=request.data)
+        serializer = ChildrenSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(parent=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -38,8 +38,8 @@ class AddChildrenViewSet(viewsets.ViewSet):
     )
     def destroy(self, request, pk=None):
         try:
-            child = AddChildren.objects.get(pk=pk, parent=request.user)
-        except AddChildren.DoesNotExist:
+            child = Children.objects.get(pk=pk, parent=request.user)
+        except Children.DoesNotExist:
             return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
 
         child.delete()
