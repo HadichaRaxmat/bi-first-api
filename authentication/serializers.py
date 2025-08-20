@@ -2,6 +2,10 @@ from rest_framework import serializers
 from django.core.validators import RegexValidator
 from .models import User
 from django.contrib.auth import authenticate
+from .models import EmailVerification
+from .utils import send_verification_email
+from django.utils import timezone
+from datetime import timedelta
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -55,7 +59,75 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         user.set_password(password)
         user.save()
+
+        code = EmailVerification.generate_code()
+        EmailVerification.objects.create(user=user, code=code)
+        send_verification_email(user)
+
         return user
+
+
+class EmailVerificationSerializer(serializers.Serializer):
+    code = serializers.SlugField(max_length=32)
+
+    def validate(self, data):
+        code = data['code']
+
+        verification = EmailVerification.objects.filter(code=code).first()
+        if not verification:
+            raise serializers.ValidationError('Code not found')
+
+        user = verification.user
+        if not user:
+            raise serializers.ValidationError('Code is invalid')
+
+        if not user.email:
+            raise serializers.ValidationError('Unknown error')
+
+        if verification.is_expired():
+            raise serializers.ValidationError('Code is expired')
+
+        verification.delete()
+
+        data['user'] = user
+        return data
+
+
+
+class ResendEmailVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate(self, data):
+        email = data.get("email")
+        user = User.objects.filter(email=email).first()
+        if not user:
+            raise serializers.ValidationError({"email": "User with this email does not exist."})
+
+        if getattr(user, "email_verified", False):  # если уже подтвержден
+            raise serializers.ValidationError({"email": "This email is already verified."})
+
+        data["user"] = user
+        return data
+
+    def save(self, **kwargs):
+        user = self.validated_data["user"]
+
+        # Удаляем старые коды
+        EmailVerification.objects.filter(user=user).delete()
+
+        # Создаём новый код
+        code = EmailVerification.generate_code()
+        EmailVerification.objects.create(
+            user=user,
+            code=code,
+            expires_at=timezone.now() + timedelta(minutes=10)
+        )
+
+        # Отправляем письмо заново
+        send_verification_email(user)
+
+        return code
+
 
 
 

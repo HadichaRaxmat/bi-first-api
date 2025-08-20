@@ -1,9 +1,10 @@
 from rest_framework.authtoken.models import Token
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import RegisterSerializer, LoginSerializer, EmailVerificationSerializer, ResendEmailVerificationSerializer
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import action
 
 
 class AuthViewSet(ViewSet):
@@ -32,4 +33,37 @@ class AuthViewSet(ViewSet):
             user = serializer.validated_data["user"]
             token, _ = Token.objects.get_or_create(user=user)
             return Response({"token": token.key}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EmailVerificationViewSet(ViewSet):
+    @swagger_auto_schema(
+        operation_description="Email verification",
+        operation_id="Email verification",
+        responses={200: EmailVerificationSerializer},
+        tags=["Authentication"],
+    )
+
+    def post(self, request):
+        verify_serializer = EmailVerificationSerializer(data=request.data)
+        if verify_serializer.is_valid():
+            user = verify_serializer.validated_data['user']
+            user.email_verified = True
+            user.save()
+            return Response({'message': 'Account is successfully confirmed'}, status=status.HTTP_200_OK)
+        return Response(verify_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_description="Resend verification email",
+        operation_id="Resend verification email",
+        responses={200: EmailVerificationSerializer},
+        tags=["Authentication"],
+    )
+
+    @action(detail=False, methods=["post"])
+    def resend(self, request):
+        serializer = ResendEmailVerificationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Verification email resent"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
