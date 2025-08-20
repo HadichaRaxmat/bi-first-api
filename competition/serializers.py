@@ -4,11 +4,7 @@ from home.models import Title
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from children.models import Children
-
-class TitleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Title
-        fields = ["id", "name"]
+from home.serializers import TitleSerializer
 
 
 class CompetitionSerializer(serializers.ModelSerializer):

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'competition',
     'authentication',
     'children',
+    'gallery'
 ]
 
 MIDDLEWARE = [
