@@ -9,4 +9,4 @@ class Gallery(BaseModel):
     description = models.TextField(verbose_name='Gallery Description')
 
     def __str__(self):
-        return self.title
+        return str(self.title)
