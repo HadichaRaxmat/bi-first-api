@@ -40,7 +40,7 @@ class EmailVerificationViewSet(ViewSet):
     @swagger_auto_schema(
         operation_description="Email verification",
         operation_id="Email verification",
-        responses={200: EmailVerificationSerializer},
+        responses={200: EmailVerificationSerializer()},
         tags=["Authentication"],
     )
 
@@ -56,7 +56,7 @@ class EmailVerificationViewSet(ViewSet):
     @swagger_auto_schema(
         operation_description="Resend verification email",
         operation_id="Resend verification email",
-        responses={200: EmailVerificationSerializer},
+        responses={200: EmailVerificationSerializer()},
         tags=["Authentication"],
     )
 
