@@ -1,24 +1,24 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework import status
 from rest_framework.response import Response
-from .serializers import CompetitionSerializer, ApplicationSerializer, ChildSerializer
+from .serializers import CompetitionSerializer, ApplicationSerializer
 from drf_yasg.utils import swagger_auto_schema
-from .models import Competition, Application, Child
+from .models import Competition, Application
 
 
 class CompetitionViewSet(ViewSet):
     @swagger_auto_schema(
-        operation_description="Get first competition",
-        operation_summary="Get first competition",
+        operation_description="Get all competitions",
+        operation_summary="Get all competitions",
         responses={200: CompetitionSerializer()},
         tags=['competition']
     )
     def get(self, request, *args, **kwargs):
-        competition = Competition.objects.first()
-        if not competition:
+        competitions = Competition.objects.all()
+        if not competitions:
             return Response({"detail": "No competitions found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = CompetitionSerializer(competition, context={'request': request})
+        serializer = CompetitionSerializer(competitions, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -57,5 +57,5 @@ class ApplicationViewSet(ViewSet):
     def create(self, request):
         serializer = ApplicationSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(parent=request.user)  # pare
+            serializer.save(parent=request.user)
 

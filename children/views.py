@@ -20,11 +20,26 @@ class ChildrenViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
+        operation_description="Получить ребёнка по ID",
+        responses={200: ChildrenSerializer(), 404: "Not Found"},
+        tags=["children"]
+    )
+    def retrieve(self, request, pk=None):
+        try:
+            child = Children.objects.get(pk=pk)
+        except Children.DoesNotExist:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ChildrenSerializer(child)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    @swagger_auto_schema(
         operation_description="Добавить ребёнка",
         request_body=ChildrenSerializer,
         responses={201: ChildrenSerializer()},
         tags=["children"]
     )
+
     def create(self, request):
         serializer = ChildrenSerializer(data=request.data)
         if serializer.is_valid():

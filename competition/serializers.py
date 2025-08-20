@@ -42,13 +42,18 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        user = self.context['request'].user
-        self.fields['children'].queryset = Children.objects.filter(parent=user)
+        request = self.context.get('request', None)
+        if request and hasattr(request, "user"):
+            user = request.user
+            self.fields['children'].queryset = Children.objects.filter(parent=user)
 
     def create(self, validated_data):
         children = validated_data.pop('children', [])
+        request = self.context.get('request')
+        parent = request.user if request else None
+
         application = Application.objects.create(
-            parent=self.context['request'].user,  # привязываем текущего родителя
+            parent=parent,
             **validated_data
         )
         application.children.set(children)
