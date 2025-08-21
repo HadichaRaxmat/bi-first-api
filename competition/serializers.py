@@ -7,17 +7,18 @@ from children.models import Children
 from home.serializers import TitleSerializer
 
 
-
 class CompetitionSerializer(serializers.ModelSerializer):
     title = TitleSerializer(read_only=True)
     status = serializers.SerializerMethodField()
 
     class Meta:
         model = Competition
-        fields = ["id", "title", "description", "image", "start_date", "end_date", "age", "status"]
+        fields = ["id", "title", "description", "image", "age", "start_date", "end_date", "status"]
 
     def get_status(self, obj):
         today = timezone.now().date()
+        if obj.end_date is None:
+            return "no_end_date"
         return "finished" if obj.end_date < today else "active"
 
 
