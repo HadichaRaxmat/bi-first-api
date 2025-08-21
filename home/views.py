@@ -88,6 +88,12 @@ class ContactNumberViewSet(ViewSet):
 
 
 class SocialMediaViewSet(ViewSet):
+    @swagger_auto_schema(
+        operation_description="List Social Media",
+        operation_summary="List Social Media",
+        responses={200: SocialMediaSerializer(many=True)},
+        tags=['home']
+    )
     def list(self, request):
         social_media = SocialMedia.objects.all()
         serializer = SocialMediaSerializer(social_media, many=True)
@@ -99,7 +105,7 @@ class ResultViewSet(ViewSet):
         operation_description="Получить все результаты",
         operation_summary="Список результатов",
         responses={200: ResultSerializer(many=True)},
-        tags=['result']
+        tags=['home']
     )
     def list(self, request):
         results = Result.objects.all()

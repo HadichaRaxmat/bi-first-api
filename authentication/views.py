@@ -13,6 +13,7 @@ class AuthViewSet(ViewSet):
         request_body=RegisterSerializer,
         responses={201: RegisterSerializer()},
         operation_summary="Регистрация нового пользователя",
+        tags=["Authentication"],
     )
     def register(self, request, *args, **kwargs):
         serializer = RegisterSerializer(data=request.data)
@@ -26,6 +27,7 @@ class AuthViewSet(ViewSet):
         request_body=LoginSerializer,
         responses={200: "Token"},
         operation_summary="Логин пользователя (email или телефон)",
+        tags=["Authentication"],
     )
     def login(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
