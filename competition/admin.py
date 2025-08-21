@@ -3,7 +3,9 @@ from .models import Competition, Application
 
 @admin.register(Competition)
 class CompetitionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description')
+    list_display = ('title', 'description', 'age', 'start_date', "end_date", "is_started", "is_finished")
+    readonly_fields = ("is_started", "is_finished")
+
 
 
 @admin.register(Application)

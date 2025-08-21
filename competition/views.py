@@ -15,7 +15,7 @@ class CompetitionViewSet(ViewSet):
         tags=['competition']
     )
     def list(self, request):
-        competitions = Competition.objects.all().order_by('-deadline')
+        competitions = Competition.objects.all().order_by('-end_date')
 
         if not competitions.exists():
             return Response({"detail": "No competitions found"}, status=status.HTTP_404_NOT_FOUND)

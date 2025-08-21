@@ -10,23 +10,20 @@ from home.serializers import TitleSerializer
 
 class CompetitionSerializer(serializers.ModelSerializer):
     title = TitleSerializer(read_only=True)
-    is_finished = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Competition
-        fields = ["id", "title", "description", "image", "deadline", "age", "is_finished"]
+        fields = ["id", "title", "description", "image", "start_date", "end_date", "age", "status"]
 
-    def get_is_finished(self, obj):
-        return obj.deadline < timezone.now()
-
+    def get_status(self, obj):
+        today = timezone.now().date()
+        return "finished" if obj.end_date < today else "active"
 
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
-    children = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=Children.objects.none()
-    )
+    children = serializers.PrimaryKeyRelatedField(many=True, queryset=Children.objects.none())
 
     class Meta:
         model = Application
