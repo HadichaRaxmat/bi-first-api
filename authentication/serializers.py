@@ -6,7 +6,7 @@ from .models import EmailVerification
 from .utils import send_verification_email
 from django.utils import timezone
 from datetime import timedelta
-
+from django.contrib.auth.hashers import check_password
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -158,3 +158,52 @@ class LoginSerializer(serializers.Serializer):
 
         data["user"] = user
         return data
+
+
+
+
+class PersonalInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["email", "phone", "first_name", "last_name", "father_name", "birth_date"]
+        read_only_fields = ['birth_date']
+
+
+
+class SecuritySerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = self.context['request'].user
+
+        # Проверка текущего пароля
+        if not check_password(data['current_password'], user.password):
+            raise serializers.ValidationError({"current_password": "Неверный текущий пароль."})
+
+        # Проверка совпадения нового пароля и подтверждения
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "Пароли не совпадают."})
+
+        # Проверка, что новый пароль не совпадает со старым
+        if data['new_password'] == data['current_password']:
+            raise serializers.ValidationError({"new_password": "Новый пароль не может совпадать с текущим."})
+
+        return data
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.set_password(self.validated_data['new_password'])
+        user.save()
+        return user
+
+
+
+
+class DangerZoneSerializer(serializers.Serializer):
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.delete()
+        return {"detail": "Аккаунт успешно удалён."}
+

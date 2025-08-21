@@ -1,9 +1,10 @@
 from rest_framework.authtoken.models import Token
-from .serializers import RegisterSerializer, LoginSerializer, EmailVerificationSerializer, ResendEmailVerificationSerializer
+from .serializers import (RegisterSerializer, LoginSerializer, EmailVerificationSerializer, ResendEmailVerificationSerializer,
+                          PersonalInfoSerializer, SecuritySerializer, DangerZoneSerializer)
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.decorators import action
 
 
@@ -69,3 +70,40 @@ class EmailVerificationViewSet(ViewSet):
             serializer.save()
             return Response({"message": "Verification email resent"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AccountViewSet(ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    # ---------- Персональная информация ----------
+    def get(self, request, pk=None):
+        """
+        GET /account/ — получить данные пользователя
+        """
+        serializer = PersonalInfoSerializer(request.user)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        """
+        PATCH /account/ — обновить данные пользователя
+        """
+        serializer = PersonalInfoSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    # ---------- Смена пароля ----------
+    @action(detail=False, methods=['post'], url_path='change-password')
+    def change_password(self, request):
+        serializer = SecuritySerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"detail": "Пароль успешно изменён."}, status=status.HTTP_200_OK)
+
+    # ---------- Удаление аккаунта ----------
+    @action(detail=False, methods=['post'], url_path='delete-account')
+    def delete(self, request):
+        serializer = DangerZoneSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        result = serializer.save()
+        return Response(result, status=status.HTTP_200_OK)

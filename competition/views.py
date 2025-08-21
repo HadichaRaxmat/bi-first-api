@@ -1,13 +1,15 @@
 from rest_framework.viewsets import ViewSet
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.response import Response
 from .serializers import CompetitionSerializer, ApplicationSerializer
 from drf_yasg.utils import swagger_auto_schema
 from .models import Competition, Application
+from rest_framework.permissions import IsAuthenticated
 
 
 
 class CompetitionViewSet(ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
     @swagger_auto_schema(
         operation_description="Get all competitions",
         operation_summary="Get all competitions",
@@ -26,6 +28,7 @@ class CompetitionViewSet(ViewSet):
 
 
 class ApplicationViewSet(ViewSet):
+    permission_classes = [IsAuthenticated]
     @swagger_auto_schema(
         operation_description="Получить список всех заявок",
         responses={200: ApplicationSerializer(many=True)},
