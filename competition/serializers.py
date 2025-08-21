@@ -37,6 +37,35 @@ class ApplicationSerializer(serializers.ModelSerializer):
             user = request.user
             self.fields['children'].queryset = Children.objects.filter(parent=user)
 
+    def validate(self, attrs):
+        competition = attrs.get("competition")
+        children = attrs.get("children", [])
+
+        # Парсим минимальный возраст из competition.age (например, "+12")
+        try:
+            min_age = int(str(competition.age).replace("+", "").strip())
+        except ValueError:
+            raise serializers.ValidationError("Некорректное значение age в Competition")
+
+        today = timezone.now().date()
+
+        # Проверяем возраст каждого ребёнка
+        for child in children:
+            if not child.date_of_birth:
+                raise serializers.ValidationError(f"У ребёнка {child} не указана дата рождения")
+
+            # Вычисляем возраст
+            age = today.year - child.date_of_birth.year - (
+                (today.month, today.day) < (child.date_of_birth.month, child.date_of_birth.day)
+            )
+
+            if age < min_age:
+                raise serializers.ValidationError(
+                    f"Ребёнок {child} слишком мал для участия. Минимальный возраст: {min_age}"
+                )
+
+        return attrs
+
     def create(self, validated_data):
         children = validated_data.pop('children', [])
         request = self.context.get('request')
@@ -48,3 +77,4 @@ class ApplicationSerializer(serializers.ModelSerializer):
         )
         application.children.set(children)
         return application
+
