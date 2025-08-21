@@ -27,7 +27,7 @@ class ContactUsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ContactUs
-        fields = ["id", "title", "description"]
+        fields = ["id", "title", 'name', "description"]
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
@@ -45,11 +45,11 @@ class LocationSerializer(serializers.ModelSerializer):
 
 
 class ContactNumberSerializer(serializers.ModelSerializer):
-    contact_us = serializers.CharField(source="contact_us.title", read_only=True)
 
     class Meta:
         model = ContactNumber
-        fields = ['id', 'contact_us', 'number', 'image']
+        fields = ['id', 'number', 'image']
+        read_only_fields = ['id']
 
 
 class SocialMediaSerializer(serializers.ModelSerializer):

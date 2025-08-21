@@ -31,6 +31,7 @@ class Header(BaseModel):
 
 class ContactUs(BaseModel):
     title = models.ForeignKey(Title, on_delete=models.CASCADE, verbose_name=_('title'))
+    name = models.CharField(max_length=250, blank=True, null=True, verbose_name=_('name'))
     description = models.CharField(max_length=250, blank=True, null=True, verbose_name=_('description'))
 
     class Meta:

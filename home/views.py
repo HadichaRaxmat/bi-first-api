@@ -77,15 +77,14 @@ class ContactNumberViewSet(ViewSet):
     @swagger_auto_schema(
         operation_description="List contact numbers",
         operation_summary="List contact numbers",
-        responses={
-            200: ContactNumberSerializer(),
-        },
+        responses={200: ContactNumberSerializer(many=True)},
         tags=['home']
     )
     def list(self, request):
         queryset = ContactNumber.objects.all()
         serializer = ContactNumberSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class SocialMediaViewSet(ViewSet):
