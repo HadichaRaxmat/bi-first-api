@@ -5,9 +5,6 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.utils import timezone
 
-from django.utils import timezone
-from django.db import models
-from django.utils.translation import gettext_lazy as _
 
 class Competition(BaseModel):
     title = models.ForeignKey(Title, on_delete=models.CASCADE, related_name="competitions", verbose_name=_("title"))
@@ -24,14 +21,6 @@ class Competition(BaseModel):
 
     def __str__(self):
         return str(self.title)
-
-    @property
-    def is_finished(self):
-        return self.end_date < timezone.now().date()
-
-    @property
-    def is_started(self):
-        return self.start_date <= timezone.now().date()
 
 
 
