@@ -73,3 +73,12 @@ class ContactNumber(BaseModel):
 
     def __str__(self):
         return f'{self.contact_us, self.number}'
+
+
+class SocialMedia(BaseModel):
+    title = models.ForeignKey(Title, on_delete=models.CASCADE, verbose_name=_('title'))
+    image = models.ImageField(upload_to="social-media", blank=True, verbose_name=_('image'))
+    url = models.URLField(blank=True, null=True, verbose_name=_('url'))
+
+    def __str__(self):
+        return f'{self.title}'

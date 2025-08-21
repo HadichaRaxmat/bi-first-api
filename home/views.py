@@ -1,9 +1,12 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework import status
 from rest_framework.response import Response
-from .serializers import HeaderSerializer, ContactUsSerializer, SubscribeSerializer, LocationSerializer, ContactNumberSerializer
+
+from .serializers import (HeaderSerializer, ContactUsSerializer, SubscribeSerializer, LocationSerializer, ContactNumberSerializer,
+                          SocialMediaSerializer)
+
 from drf_yasg.utils import swagger_auto_schema
-from .models import Header, ContactUs, Location, ContactNumber
+from .models import Header, ContactUs, Location, ContactNumber, SocialMedia
 
 
 class HomeViewSet(ViewSet):
@@ -82,4 +85,11 @@ class ContactNumberViewSet(ViewSet):
     def list(self, request):
         queryset = ContactNumber.objects.all()
         serializer = ContactNumberSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class SocialMediaViewSet(ViewSet):
+    def list(self, request):
+        social_media = SocialMedia.objects.all()
+        serializer = SocialMediaSerializer(social_media, many=True)
         return Response(serializer.data)
