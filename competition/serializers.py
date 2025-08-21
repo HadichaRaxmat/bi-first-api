@@ -7,21 +7,17 @@ from children.models import Children
 from home.serializers import TitleSerializer
 
 
+
 class CompetitionSerializer(serializers.ModelSerializer):
     title = TitleSerializer(read_only=True)
     is_finished = serializers.SerializerMethodField()
 
     class Meta:
         model = Competition
-        fields = ["id", "title", "description", "image", "deadline", "is_finished"]
+        fields = ["id", "title", "description", "image", "deadline", "age", "is_finished"]
 
-        def get_is_finished(self, obj):
-            return obj.deadline < timezone.now()
-
-        def join_competition(request, pk):
-            competition = Competition.objects.get(pk=pk)
-            if competition.deadline < timezone.now():
-                raise ValidationError("Конкурс уже завершён.")
+    def get_is_finished(self, obj):
+        return obj.deadline < timezone.now()
 
 
 

@@ -6,25 +6,26 @@ from drf_yasg.utils import swagger_auto_schema
 from .models import Competition, Application
 
 
+
 class CompetitionViewSet(ViewSet):
     @swagger_auto_schema(
         operation_description="Get all competitions",
         operation_summary="Get all competitions",
-        responses={200: CompetitionSerializer()},
+        responses={200: CompetitionSerializer(many=True)},
         tags=['competition']
     )
-    def get(self, request, *args, **kwargs):
-        competitions = Competition.objects.all()
-        if not competitions:
+    def list(self, request):
+        competitions = Competition.objects.all().order_by('-deadline')
+
+        if not competitions.exists():
             return Response({"detail": "No competitions found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = CompetitionSerializer(competitions, context={'request': request})
+        serializer = CompetitionSerializer(competitions, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
 class ApplicationViewSet(ViewSet):
-
     @swagger_auto_schema(
         operation_description="Получить список всех заявок",
         responses={200: ApplicationSerializer(many=True)},

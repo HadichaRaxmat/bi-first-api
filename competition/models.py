@@ -8,6 +8,7 @@ class Competition(BaseModel):
     title = models.ForeignKey(Title, on_delete=models.CASCADE, related_name="competitions", verbose_name=_("title"))
     image = models.ImageField(upload_to="competition_images/", blank=True, null=True, verbose_name=_("Images"))
     description = models.TextField(verbose_name=_("description"))
+    age = models.PositiveIntegerField(verbose_name=_("age"))
     deadline = models.DateTimeField(verbose_name=_("deadline"))
 
     class Meta:
