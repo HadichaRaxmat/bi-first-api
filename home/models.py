@@ -82,3 +82,13 @@ class SocialMedia(BaseModel):
 
     def __str__(self):
         return f'{self.title}'
+
+
+class Result(BaseModel):
+    title = models.ForeignKey(Title, on_delete=models.CASCADE, verbose_name=_('title'))
+    image = models.ImageField(upload_to="result", blank=True, verbose_name=_('image'))
+    number = models.CharField(max_length=250, blank=True, null=True, verbose_name=_('number'))
+    description = models.CharField(max_length=100,  blank=True, null=True, verbose_name=_('description'))
+
+    def __str__(self):
+        return f'{self.title}'
