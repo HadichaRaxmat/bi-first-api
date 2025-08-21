@@ -76,14 +76,14 @@ class AccountViewSet(ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     # ---------- Персональная информация ----------
-    def get(self, request, pk=None):
+    def retrieve(self, request, pk=None):
         """
         GET /account/ — получить данные пользователя
         """
         serializer = PersonalInfoSerializer(request.user)
         return Response(serializer.data)
 
-    def update(self, request, pk=None):
+    def partial_update(self, request, pk=None):
         """
         PATCH /account/ — обновить данные пользователя
         """
@@ -102,7 +102,7 @@ class AccountViewSet(ViewSet):
 
     # ---------- Удаление аккаунта ----------
     @action(detail=False, methods=['post'], url_path='delete-account')
-    def delete(self, request):
+    def delete_account(self, request):
         serializer = DangerZoneSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         result = serializer.save()
