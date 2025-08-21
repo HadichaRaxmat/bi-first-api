@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Title, Header, ContactUs, Subscribe, Location, ContactNumber
+from .models import Title, Header, ContactUs, Subscribe, Location, ContactNumber, SocialMedia
 
 admin.site.register(Title)
 admin.site.register(Header)
@@ -11,3 +11,7 @@ class ContactUsAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'description')
 
 admin.site.register(Subscribe)
+
+@admin.register(SocialMedia)
+class SocialMediaAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'image', 'url')
