@@ -29,6 +29,7 @@ class CompetitionViewSet(ViewSet):
 
 class ApplicationViewSet(ViewSet):
     permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         operation_description="Создать новую заявку",
         request_body=ApplicationSerializer,
@@ -36,9 +37,19 @@ class ApplicationViewSet(ViewSet):
         tags=["applications"]
     )
     def create(self, request):
-        serializer = ApplicationSerializer(data=request.data)
+        serializer = ApplicationSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
-            serializer.save(parent=request.user)
+            application = serializer.save(parent=request.user)
+
+            # ✅ Обновляем количество участников
+            competition = application.competition
+            children_count = application.children.count()
+            competition.participants = (competition.participants or 0) + children_count
+            competition.save(update_fields=["participants"])
+
+            return Response(ApplicationSerializer(application).data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_description="Subscribe",

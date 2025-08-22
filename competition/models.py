@@ -14,6 +14,7 @@ class Competition(BaseModel):
     age = models.CharField(max_length=20, verbose_name=_("age"))
     start_date = models.DateField(default=timezone.now, verbose_name=_("start date"))
     end_date = models.DateField(verbose_name=_("end date"), null=True, blank=True)
+    participants = models.PositiveIntegerField(default=0, verbose_name=_("participants"))
 
     class Meta:
         verbose_name = _("competition")
