@@ -214,24 +214,12 @@ class DangerZoneSerializer(serializers.Serializer):
 from competition.models import Application, Competition
 from django.utils import timezone
 
-def get_competition_status(end_date):
-    today = timezone.now().date()
-    if not end_date:
-        return "no_end_date"
-    return "finished" if end_date < today else "active"
-
-
 class MyCompetitionSerializer(serializers.ModelSerializer):
-    competition = serializers.CharField(source='competition.title', read_only=True)
-    status = serializers.SerializerMethodField()
+    competition = serializers.CharField(source="competition.title", read_only=True)
 
     class Meta:
         model = Application
-        fields = ["id", "competition", "status"]
-
-    def get_status(self, obj):
-        return get_competition_status(obj.competition.end_date)
-
+        fields = ["id", "competition"]
 
 class MySubscribedCompetitionSerializer(serializers.ModelSerializer):
     competition = serializers.CharField(source="title", read_only=True)
