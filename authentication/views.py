@@ -73,19 +73,12 @@ class EmailVerificationViewSet(ViewSet):
 
 
 
-from competition.models import Application, CompetitionSubscriber, Competition
-from .serializers import MyCompetitionSerializer, MySubscribedCompetitionSerializer
+from competition.models import Application, Competition
+from .serializers import MyCompetitionSerializer, MySubscribedCompetitionSerializer, CompetitionResponseSerializer
 from django.utils import timezone
 from django.db.models import Q
 from drf_yasg import openapi
 
-status_param = openapi.Parameter(
-    'status',
-    openapi.IN_QUERY,
-    description="Фильтр по статусу: | active | finished | subscriptions",
-    type=openapi.TYPE_STRING,
-    enum=["active", "finished", "subscriptions"]
-)
 
 class AccountViewSet(ViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -121,11 +114,31 @@ class AccountViewSet(ViewSet):
 
 
     # ---------- Мои конкурсы ----------
+    status_param = openapi.Parameter(
+        'status',
+        openapi.IN_QUERY,
+        description="Фильтр по статусу (subscriptions | active | finished)",
+        type=openapi.TYPE_STRING,
+        enum=['subscriptions', 'active', 'finished']
+    )
+
     @swagger_auto_schema(
         operation_description="Получить список моих конкурсов по статусу",
         operation_id="Get my competitions",
         manual_parameters=[status_param],
-        responses={200: MyCompetitionSerializer(many=True)},
+        responses={
+            200: openapi.Response(
+                description="Список моих конкурсов",
+                schema=CompetitionResponseSerializer(many=True),
+                examples={
+                    "application/json": [
+                        {"id": 1, "competition": "Мой первый конкурс"},
+                        {"id": 2, "competition": "Летний марафон"}
+                    ]
+                }
+            ),
+            400: openapi.Response(description="Неверный статус")
+        },
         tags=["Account"]
     )
     @action(detail=False, methods=['get'], url_path='my-competitions')
