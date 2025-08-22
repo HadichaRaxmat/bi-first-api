@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from rest_framework.decorators import action
 
-
 class AuthViewSet(ViewSet):
     # --- Регистрация ---
     @swagger_auto_schema(
@@ -74,11 +73,18 @@ class EmailVerificationViewSet(ViewSet):
 
 
 
-from competition.models import Application, CompetitionSubscriber
-from .serializers import MyCompetitionSerializer
+from competition.models import Application, CompetitionSubscriber, Competition
+from .serializers import MyCompetitionSerializer, MySubscribedCompetitionSerializer
 from django.utils import timezone
 from django.db.models import Q
+from drf_yasg import openapi
 
+status_param = openapi.Parameter(
+    'status',
+    openapi.IN_QUERY,
+    description="Фильтр: active — активные, finished — завершенные, subscription — подписки",
+    type=openapi.TYPE_STRING
+)
 
 class AccountViewSet(ViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -112,45 +118,42 @@ class AccountViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data)
 
+
     # ---------- Мои конкурсы ----------
     @swagger_auto_schema(
         operation_description="Get my competitions",
         operation_id="Get my competitions",
-        responses={200: MyCompetitionSerializer()},
-        tags=["Account"],
+        manual_parameters=[status_param],
+        responses={200: openapi.Response(description="Список моих конкурсов")},
+        tags=["Account"]
     )
     @action(detail=False, methods=['get'], url_path='my-competitions')
     def my_competitions(self, request):
-        """
-        GET /profile/my-competitions/?status=<active|finished|subscriptions>
-        """
         status_filter = request.query_params.get("status")
         today = timezone.now().date()
 
-        if status_filter == "subscription":
-            # Список конкурсов, на которые подписан пользователь
-            subscribed_competitions = CompetitionSubscriber.objects.filter(
-                subscriber=request.user
-            ).values_list('competition', flat=True)
-            applications = Application.objects.filter(
-                parent=request.user,
-                competition__in=subscribed_competitions
-            )
+        if status_filter == "subscriptions":
+            competitions = Competition.objects.filter(subscribers__subscriber=request.user)
+            serializer = MySubscribedCompetitionSerializer(competitions, many=True)
+
         elif status_filter == "active":
             applications = Application.objects.filter(
                 parent=request.user
             ).filter(
                 Q(competition__end_date__gte=today) | Q(competition__end_date__isnull=True)
             )
+            serializer = MyCompetitionSerializer(applications, many=True)
+
         elif status_filter == "finished":
             applications = Application.objects.filter(
                 parent=request.user,
                 competition__end_date__lt=today
             )
+            serializer = MyCompetitionSerializer(applications, many=True)
+
         else:
             return Response({"detail": "Неверный статус"}, status=400)
 
-        serializer = MyCompetitionSerializer(applications, many=True, context={'request': request})
         return Response(serializer.data)
 
     # ---------- Смена пароля ----------

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Competition, Application
+from .models import Competition, Application, CompetitionSubscriber
 
 @admin.register(Competition)
 class CompetitionAdmin(admin.ModelAdmin):
@@ -27,3 +27,6 @@ class ApplicationAdmin(admin.ModelAdmin):
 
     get_children.short_description = "Children"
 
+@admin.register(CompetitionSubscriber)
+class CompetitionSubscriberAdmin(admin.ModelAdmin):
+    list_display = ('id', 'subscriber', 'competition')

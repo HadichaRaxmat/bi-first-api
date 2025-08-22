@@ -37,15 +37,14 @@ class Application(BaseModel):
 
 
 
-class CompetitionSubscriber(models.Model):
+class CompetitionSubscriber(BaseModel):
     subscriber = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="competition_subscriptions")
     competition = models.ForeignKey("Competition", on_delete=models.CASCADE, related_name="subscribers")
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('subscriber', 'competition')
-        verbose_name = _("Competition Subscription")
-        verbose_name_plural = _("Competition Subscriptions")
+        verbose_name = _("Competition Subscriber")
+        verbose_name_plural = _("Competition Subscribers")
 
     def __str__(self):
         return f"{self.subscriber} → {self.competition}"
