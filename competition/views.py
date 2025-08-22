@@ -1,11 +1,11 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework import status, permissions
 from rest_framework.response import Response
-from .serializers import CompetitionSerializer, ApplicationSerializer
+from .serializers import CompetitionSerializer, ApplicationSerializer, CompetitionSubscriberSerializer
 from drf_yasg.utils import swagger_auto_schema
-from .models import Competition, Application
+from .models import Competition, Application, CompetitionSubscriber
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.decorators import action
 
 
 class CompetitionViewSet(ViewSet):
@@ -63,3 +63,19 @@ class ApplicationViewSet(ViewSet):
         if serializer.is_valid():
             serializer.save(parent=request.user)
 
+    @swagger_auto_schema(
+        operation_description="Subscribe",
+        request_body=ApplicationSerializer,
+        responses={201: ApplicationSerializer(), 400: "Bad Request"},
+        tags=["applications"]
+    )
+    @action(detail=False, methods=['post'], url_path='subscribe')
+    def subscribe(self, request):
+        """
+        POST /applications/subscribe/ — подписка на конкурс
+        body: { "competition": <id конкурса> }
+        """
+        serializer = CompetitionSubscriberSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"detail": "Подписка создана"}, status=status.HTTP_201_CREATED)

@@ -1,8 +1,6 @@
 from rest_framework import serializers
-from .models import Competition, Application
-from home.models import Title
+from .models import Competition, Application, CompetitionSubscriber
 from django.utils import timezone
-from rest_framework.exceptions import ValidationError
 from children.models import Children
 from home.serializers import TitleSerializer
 
@@ -77,4 +75,19 @@ class ApplicationSerializer(serializers.ModelSerializer):
         )
         application.children.set(children)
         return application
+
+
+
+class CompetitionSubscriberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompetitionSubscriber
+        fields = ["id", "competition"]
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        subscription, created = CompetitionSubscriber.objects.get_or_create(
+            subscriber=user,
+            competition=validated_data['competition']
+        )
+        return subscription
 

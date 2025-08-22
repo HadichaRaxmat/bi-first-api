@@ -72,9 +72,23 @@ class EmailVerificationViewSet(ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
+from competition.models import Application, CompetitionSubscriber
+from .serializers import MyCompetitionSerializer
+from django.utils import timezone
+from django.db.models import Q
+
+
 class AccountViewSet(ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="get profile",
+        operation_id="get profile",
+        responses={200: PersonalInfoSerializer()},
+        tags=["Account"],
+    )
     # ---------- Персональная информация ----------
     def retrieve(self, request, pk=None):
         """
@@ -83,6 +97,12 @@ class AccountViewSet(ViewSet):
         serializer = PersonalInfoSerializer(request.user)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_description="Update profile",
+        operation_id="Update profile",
+        responses={200: PersonalInfoSerializer()},
+        tags=["Account"],
+    )
     def partial_update(self, request, pk=None):
         """
         PATCH /account/ — обновить данные пользователя
@@ -92,7 +112,54 @@ class AccountViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data)
 
+    # ---------- Мои конкурсы ----------
+    @swagger_auto_schema(
+        operation_description="Get my competitions",
+        operation_id="Get my competitions",
+        responses={200: MyCompetitionSerializer()},
+        tags=["Account"],
+    )
+    @action(detail=False, methods=['get'], url_path='my-competitions')
+    def my_competitions(self, request):
+        """
+        GET /profile/my-competitions/?status=<active|finished|subscriptions>
+        """
+        status_filter = request.query_params.get("status")
+        today = timezone.now().date()
+
+        if status_filter == "subscription":
+            # Список конкурсов, на которые подписан пользователь
+            subscribed_competitions = CompetitionSubscriber.objects.filter(
+                subscriber=request.user
+            ).values_list('competition', flat=True)
+            applications = Application.objects.filter(
+                parent=request.user,
+                competition__in=subscribed_competitions
+            )
+        elif status_filter == "active":
+            applications = Application.objects.filter(
+                parent=request.user
+            ).filter(
+                Q(competition__end_date__gte=today) | Q(competition__end_date__isnull=True)
+            )
+        elif status_filter == "finished":
+            applications = Application.objects.filter(
+                parent=request.user,
+                competition__end_date__lt=today
+            )
+        else:
+            return Response({"detail": "Неверный статус"}, status=400)
+
+        serializer = MyCompetitionSerializer(applications, many=True, context={'request': request})
+        return Response(serializer.data)
+
     # ---------- Смена пароля ----------
+    @swagger_auto_schema(
+        operation_description="Change password",
+        operation_id="Change password",
+        responses={200: SecuritySerializer()},
+        tags=["Account"],
+    )
     @action(detail=False, methods=['post'], url_path='change-password')
     def change_password(self, request):
         serializer = SecuritySerializer(data=request.data, context={'request': request})
@@ -101,9 +168,18 @@ class AccountViewSet(ViewSet):
         return Response({"detail": "Пароль успешно изменён."}, status=status.HTTP_200_OK)
 
     # ---------- Удаление аккаунта ----------
+    @swagger_auto_schema(
+        operation_description="Delete account",
+        operation_id="Delete account",
+        responses={200: DangerZoneSerializer()},
+        tags=["Account"],
+    )
     @action(detail=False, methods=['post'], url_path='delete-account')
     def delete_account(self, request):
         serializer = DangerZoneSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         result = serializer.save()
         return Response(result, status=status.HTTP_200_OK)
+
+
+

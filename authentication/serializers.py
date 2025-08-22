@@ -8,6 +8,8 @@ from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth.hashers import check_password
 
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
@@ -206,4 +208,27 @@ class DangerZoneSerializer(serializers.Serializer):
         user = self.context['request'].user
         user.delete()
         return {"detail": "Аккаунт успешно удалён."}
+
+
+
+from competition.models import Application
+from django.utils import timezone
+
+class MyCompetitionSerializer(serializers.ModelSerializer):
+    competition = serializers.CharField(source='competition.title.title', read_only=True)
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Application
+        fields = ["id", "competition", "status"]
+
+    def get_status(self, obj):
+        today = timezone.now().date()
+        end_date = obj.competition.end_date
+        if not end_date:
+            return "no_end_date"
+        return "finished" if end_date < today else "active"
+
+
+
 
