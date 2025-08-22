@@ -221,6 +221,7 @@ class MyCompetitionSerializer(serializers.ModelSerializer):
         model = Application
         fields = ["id", "competition"]
 
+
 class MySubscribedCompetitionSerializer(serializers.ModelSerializer):
     competition = serializers.CharField(source="title", read_only=True)
 
@@ -229,4 +230,6 @@ class MySubscribedCompetitionSerializer(serializers.ModelSerializer):
         fields = ["id", "competition"]
 
 
-
+class CompetitionResponseSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    competition = serializers.CharField()

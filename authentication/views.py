@@ -82,8 +82,9 @@ from drf_yasg import openapi
 status_param = openapi.Parameter(
     'status',
     openapi.IN_QUERY,
-    description="Фильтр: active — активные, finished — завершенные, subscription — подписки",
-    type=openapi.TYPE_STRING
+    description="Фильтр по статусу: | active | finished | subscriptions",
+    type=openapi.TYPE_STRING,
+    enum=["active", "finished", "subscriptions"]
 )
 
 class AccountViewSet(ViewSet):
@@ -121,10 +122,10 @@ class AccountViewSet(ViewSet):
 
     # ---------- Мои конкурсы ----------
     @swagger_auto_schema(
-        operation_description="Get my competitions",
+        operation_description="Получить список моих конкурсов по статусу",
         operation_id="Get my competitions",
         manual_parameters=[status_param],
-        responses={200: openapi.Response(description="Список моих конкурсов")},
+        responses={200: MyCompetitionSerializer(many=True)},
         tags=["Account"]
     )
     @action(detail=False, methods=['get'], url_path='my-competitions')
@@ -155,6 +156,7 @@ class AccountViewSet(ViewSet):
             return Response({"detail": "Неверный статус"}, status=400)
 
         return Response(serializer.data)
+
 
     # ---------- Смена пароля ----------
     @swagger_auto_schema(
