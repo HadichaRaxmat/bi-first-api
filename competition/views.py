@@ -30,29 +30,6 @@ class CompetitionViewSet(ViewSet):
 class ApplicationViewSet(ViewSet):
     permission_classes = [IsAuthenticated]
     @swagger_auto_schema(
-        operation_description="Получить список всех заявок",
-        responses={200: ApplicationSerializer(many=True)},
-        tags=["applications"]
-    )
-    def list(self, request):
-        applications = Application.objects.all()
-        serializer = ApplicationSerializer(applications, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @swagger_auto_schema(
-        operation_description="Получить заявку по ID",
-        responses={200: ApplicationSerializer(), 404: "Not Found"},
-        tags=["applications"]
-    )
-    def retrieve(self, request, pk=None):
-        try:
-            application = Application.objects.get(pk=pk)
-        except Application.DoesNotExist:
-            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
-        serializer = ApplicationSerializer(application)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @swagger_auto_schema(
         operation_description="Создать новую заявку",
         request_body=ApplicationSerializer,
         responses={201: ApplicationSerializer(), 400: "Bad Request"},
@@ -65,8 +42,8 @@ class ApplicationViewSet(ViewSet):
 
     @swagger_auto_schema(
         operation_description="Subscribe",
-        request_body=ApplicationSerializer,
-        responses={201: ApplicationSerializer(), 400: "Bad Request"},
+        request_body=CompetitionSubscriberSerializer,
+        responses={201: CompetitionSubscriberSerializer(), 400: "Bad Request"},
         tags=["applications"]
     )
     @action(detail=False, methods=['post'], url_path='subscribe')

@@ -6,9 +6,8 @@ urlpatterns = [
     path('get_competition/', CompetitionViewSet.as_view({'get': 'list'}), name='competition'),
 
     # Заявки
-    path('applications/', ApplicationViewSet.as_view({'get': 'list', 'post': 'create'}), name='application-list'),
-    path('applications/<int:pk>/', ApplicationViewSet.as_view({'get': 'retrieve'}), name='application-detail'),
+    path('applications/', ApplicationViewSet.as_view({'post': 'create'}), name='application-list'),
 
-    # Подписки (GET — список, POST — подписка)
-    path('applications/subscriptions/', ApplicationViewSet.as_view({'get': 'subscriptions', 'post': 'subscribe'}), name='subscriptions'),
+    # POST — подписка)
+    path('applications/subscription/', ApplicationViewSet.as_view({'post': 'subscribe'}), name='application-subscribe'),
 ]
