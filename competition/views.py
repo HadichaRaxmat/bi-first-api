@@ -67,3 +67,19 @@ class ApplicationViewSet(ViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"detail": "Подписка создана"}, status=status.HTTP_201_CREATED)
+
+
+
+
+from django.db import transaction
+from .serializers import CompetitionPaymentSerializer
+
+class CompetitionPaymentViewSet(ViewSet):
+    def post(self, request, *args, **kwargs):
+        serializer = CompetitionPaymentSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        with transaction.atomic():
+            payment = serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Competition, Application, CompetitionSubscriber
+from .models import Competition, Application, CompetitionSubscriber, CompetitionPayment
 from django.utils import timezone
 from children.models import Children
 from home.serializers import TitleSerializer
@@ -91,3 +91,23 @@ class CompetitionSubscriberSerializer(serializers.ModelSerializer):
         )
         return subscription
 
+
+from django.db import transaction
+import uuid
+
+class CompetitionPaymentSerializer(serializers.ModelSerializer):
+    payment_method = serializers.CharField(source="application", read_only=True)
+    class Meta:
+        model = CompetitionPayment
+        fields = ["payment_id", "price", "date_time", 'payment_method']
+        read_only_fields = ["date_time", "payment_id", "payment_method"]
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            # Генерируем уникальный payment_id
+            validated_data['payment_id'] = uuid.uuid4().hex
+
+            # Создаём платеж
+            payment = CompetitionPayment.objects.create(**validated_data)
+
+        return payment
