@@ -1,9 +1,9 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework import status, permissions
 from rest_framework.response import Response
-from .serializers import CompetitionSerializer, ApplicationSerializer, CompetitionSubscriberSerializer
+from .serializers import CompetitionSerializer, ApplicationSerializer, CompetitionSubscriberSerializer, CompetitionPaymentSerializer
 from drf_yasg.utils import swagger_auto_schema
-from .models import Competition, Application, CompetitionSubscriber
+from .models import Competition
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
@@ -41,7 +41,7 @@ class ApplicationViewSet(ViewSet):
         if serializer.is_valid():
             application = serializer.save(parent=request.user)
 
-            # ✅ Обновляем количество участников
+            # Обновляем количество участников
             competition = application.competition
             children_count = application.children.count()
             competition.participants = (competition.participants or 0) + children_count
@@ -71,15 +71,10 @@ class ApplicationViewSet(ViewSet):
 
 
 
-from django.db import transaction
-from .serializers import CompetitionPaymentSerializer
 
 class CompetitionPaymentViewSet(ViewSet):
-    def post(self, request, *args, **kwargs):
-        serializer = CompetitionPaymentSerializer(data=request.data)
+    def create(self, request, *args, **kwargs):
+        serializer = CompetitionPaymentSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
-
-        with transaction.atomic():
-            payment = serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        payment = serializer.save()
+        return Response(CompetitionPaymentSerializer(payment).data, status=status.HTTP_201_CREATED)

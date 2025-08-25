@@ -23,6 +23,7 @@ class CompetitionSerializer(serializers.ModelSerializer):
 
 class ApplicationSerializer(serializers.ModelSerializer):
     children = serializers.PrimaryKeyRelatedField(many=True, queryset=Children.objects.none())
+    payment = serializers.SerializerMethodField()
 
     class Meta:
         model = Application
@@ -96,18 +97,33 @@ from django.db import transaction
 import uuid
 
 class CompetitionPaymentSerializer(serializers.ModelSerializer):
-    payment_method = serializers.CharField(source="application", read_only=True)
+    payment_method = serializers.SerializerMethodField()
+
     class Meta:
         model = CompetitionPayment
-        fields = ["payment_id", "price", "date_time", 'payment_method']
+        fields = ["payment_id", "price", "date_time", "payment_method"]
         read_only_fields = ["date_time", "payment_id", "payment_method"]
 
-    def create(self, validated_data):
-        with transaction.atomic():
-            # Генерируем уникальный payment_id
-            validated_data['payment_id'] = uuid.uuid4().hex
+    # ✅ Возвращаем метод оплаты из Application
+    def get_payment_method(self, obj):
+        return obj.application.payment_method
 
-            # Создаём платеж
+    def create(self, validated_data):
+        request = self.context.get("request")
+        application_id = request.data.get("application_id")
+
+        if not application_id:
+            raise serializers.ValidationError({"application_id": "Это поле обязательно."})
+
+        try:
+            application = Application.objects.get(id=application_id)
+        except Application.DoesNotExist:
+            raise serializers.ValidationError({"application_id": "Заявка не найдена."})
+
+        with transaction.atomic():
+            validated_data["payment_id"] = uuid.uuid4().hex
+            validated_data["application"] = application
             payment = CompetitionPayment.objects.create(**validated_data)
 
         return payment
+
