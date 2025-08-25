@@ -34,6 +34,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, blank=True, null=True, verbose_name=_("Email"))
+    image = models.ImageField(blank=True, null=True, verbose_name=_("user_Image"))
     phone = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name=_("Phone"))
     first_name = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("First Name"))
     last_name = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Last Name"))

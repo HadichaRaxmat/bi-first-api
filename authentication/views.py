@@ -74,7 +74,8 @@ class EmailVerificationViewSet(ViewSet):
 
 
 from competition.models import Application, Competition
-from .serializers import MyCompetitionSerializer, MySubscribedCompetitionSerializer, CompetitionResponseSerializer
+from .serializers import (MyCompetitionSerializer, MySubscribedCompetitionSerializer, CompetitionResponseSerializer,
+                          CompetitionDetailSerializer)
 from django.utils import timezone
 from django.db.models import Q
 from drf_yasg import openapi
@@ -168,6 +169,21 @@ class AccountViewSet(ViewSet):
         else:
             return Response({"detail": "Неверный статус"}, status=400)
 
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="competition")
+    def competition_detail(self, request, pk=None):
+        """
+        Получить детальную информацию о конкурсе, на который подана заявка.
+        pk — это ID Application.
+        """
+        try:
+            application = Application.objects.get(id=pk, parent=request.user)
+        except Application.DoesNotExist:
+            return Response({"detail": "Заявка не найдена или доступ запрещён"}, status=status.HTTP_404_NOT_FOUND)
+
+        competition = application.competition
+        serializer = CompetitionDetailSerializer(competition)
         return Response(serializer.data)
 
 

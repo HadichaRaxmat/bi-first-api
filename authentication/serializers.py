@@ -167,7 +167,7 @@ class LoginSerializer(serializers.Serializer):
 class PersonalInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["email", "phone", "first_name", "last_name", "father_name", "birth_date"]
+        fields = ["image", "email", "phone", "first_name", "last_name", "birth_date"]
         read_only_fields = ['birth_date']
 
 
@@ -233,3 +233,11 @@ class MySubscribedCompetitionSerializer(serializers.ModelSerializer):
 class CompetitionResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     competition = serializers.CharField()
+
+
+class CompetitionDetailSerializer(serializers.ModelSerializer):
+    competition_title = serializers.CharField(source="title", read_only=True)
+
+    class Meta:
+        model = Competition
+        fields = ["id", "title", "about_competition", "end_date", "participants"]
