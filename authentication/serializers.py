@@ -9,7 +9,6 @@ from datetime import timedelta
 from django.contrib.auth.hashers import check_password
 
 
-
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
@@ -244,6 +243,3 @@ class CompetitionDetailSerializer(serializers.ModelSerializer):
 
 
 
-class AddJury(serializers.ModelSerializer):
-    class Meta:
-        model = Competition

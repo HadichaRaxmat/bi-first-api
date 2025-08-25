@@ -1,11 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, EmailVerification
+
+from competition.models import Competition
+from .models import User, EmailVerification, AddJuries
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     model = User
-    list_display = ("id", "email", "phone", "first_name", "last_name", "is_staff", "is_active", "work_place")
+    list_display = ("id", "email", "phone", "first_name", "last_name", "is_staff", "is_active")
     list_filter = ("is_staff", "is_active")
 
     # убираем username, добавляем email/phone
@@ -28,3 +30,12 @@ class UserAdmin(BaseUserAdmin):
 class EmailVerificationAdmin(admin.ModelAdmin):
     model = EmailVerification
     list_display = ("id", "user", "code", "expires_at")
+
+
+@admin.register(AddJuries)
+class AddJuriesAdmin(admin.ModelAdmin):
+    list_display = ("full_name", "birth_date", "work_place", "academic_degree", "profession")
+
+    def full_name(self, obj):
+        return f"{obj.first_name or ''} {obj.last_name or ''}".strip()
+    full_name.short_description = "Full Name"
