@@ -40,9 +40,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Last Name"))
     father_name = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Father Name"))
     birth_date = models.DateField(blank=True, null=True, verbose_name=_("Birth Date"))
+    work_place = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Work place"))
+    academic_degree = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Academic Degree"))
+    profession = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Profession"))
+    login = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Login"))
+    password = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Password"))
     email_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     objects = UserManager()
 
@@ -70,4 +77,8 @@ class EmailVerification(BaseModel):
 
     def is_expired(self):
         return timezone.now() > self.expires_at
+
+
+
+
 

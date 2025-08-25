@@ -241,3 +241,9 @@ class CompetitionDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Competition
         fields = ["id", "title", "about_competition", "end_date", "participants"]
+
+
+
+class AddJury(serializers.ModelSerializer):
+    class Meta:
+        model = Competition

@@ -5,7 +5,7 @@ from .models import User, EmailVerification
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     model = User
-    list_display = ("id", "email", "phone", "first_name", "last_name", "is_staff", "is_active")
+    list_display = ("id", "email", "phone", "first_name", "last_name", "is_staff", "is_active", "work_place")
     list_filter = ("is_staff", "is_active")
 
     # убираем username, добавляем email/phone
