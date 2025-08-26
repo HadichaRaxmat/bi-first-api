@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CompetitionViewSet, ApplicationViewSet, CompetitionPaymentViewSet
+from .views import CompetitionViewSet, ApplicationViewSet
 
 urlpatterns = [
     # Список конкурсов
@@ -10,7 +10,4 @@ urlpatterns = [
 
     # POST — подписка)
     path('applications/subscription/', ApplicationViewSet.as_view({'post': 'subscribe'}), name='application-subscribe'),
-
-    # post - payment
-    path('competition/payment/', CompetitionPaymentViewSet.as_view({'post': 'create'}), name='competition-payment'),
 ]

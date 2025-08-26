@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework import status, permissions
 from rest_framework.response import Response
-from .serializers import CompetitionSerializer, ApplicationSerializer, CompetitionSubscriberSerializer, CompetitionPaymentSerializer
+from .serializers import CompetitionSerializer, ApplicationSerializer, CompetitionSubscriberSerializer
 from drf_yasg.utils import swagger_auto_schema
 from .models import Competition
 from rest_framework.permissions import IsAuthenticated
@@ -67,14 +67,3 @@ class ApplicationViewSet(ViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"detail": "Подписка создана"}, status=status.HTTP_201_CREATED)
-
-
-
-
-
-class CompetitionPaymentViewSet(ViewSet):
-    def create(self, request, *args, **kwargs):
-        serializer = CompetitionPaymentSerializer(data=request.data, context={"request": request})
-        serializer.is_valid(raise_exception=True)
-        payment = serializer.save()
-        return Response(CompetitionPaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
