@@ -23,7 +23,7 @@ class CompetitionSerializer(serializers.ModelSerializer):
 
 class ApplicationSerializer(serializers.ModelSerializer):
     children = serializers.PrimaryKeyRelatedField(many=True, queryset=Children.objects.none())
-    payment = serializers.SerializerMethodField()
+    payment_method = serializers.SerializerMethodField()
 
     class Meta:
         model = Application

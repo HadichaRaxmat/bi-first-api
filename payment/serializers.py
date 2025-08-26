@@ -16,7 +16,7 @@ class PaymentSerializer(serializers.ModelSerializer):
     def get_payment_method(self, obj):
         return obj.application.payment_method
 
-    def create(self, validated_data):
+    def validate(self, attrs):
         request = self.context.get("request")
         application_id = request.data.get("application_id")
 
@@ -28,9 +28,17 @@ class PaymentSerializer(serializers.ModelSerializer):
         except Application.DoesNotExist:
             raise serializers.ValidationError({"application_id": "Заявка не найдена."})
 
+        if not application.payment_method:
+            raise serializers.ValidationError({"payment_method": "Метод оплаты не выбран в заявке."})
+
+        if application.payments.exists():
+            raise serializers.ValidationError({"application": "Для этой заявки уже есть платеж."})
+
+        attrs["application"] = application
+        return attrs
+
+    def create(self, validated_data):
         with transaction.atomic():
             validated_data["payment_id"] = uuid.uuid4().hex
-            validated_data["application"] = application
             payment = Payment.objects.create(**validated_data)
-
         return payment

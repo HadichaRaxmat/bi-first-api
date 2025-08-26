@@ -8,9 +8,9 @@ from drf_yasg.utils import swagger_auto_schema
 
 class PaymentViewSet(ViewSet):
     @swagger_auto_schema(
-        operation_description="Payment",
-        operation_id="Payment",
-        responses={200: PaymentSerializer()},
+        operation_description="Создание платежа",
+        request_body=PaymentSerializer,
+        responses={201: PaymentSerializer()},
         tags=["payment"],
     )
     def create(self, request, *args, **kwargs):
