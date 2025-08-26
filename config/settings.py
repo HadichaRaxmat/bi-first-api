@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'competition',
     'authentication',
     'children',
-    'gallery'
+    'gallery',
+    'payment',
 ]
 
 MIDDLEWARE = [

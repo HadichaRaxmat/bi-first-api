@@ -1,6 +1,6 @@
 from rest_framework.authtoken.models import Token
 from .serializers import (RegisterSerializer, LoginSerializer, EmailVerificationSerializer, ResendEmailVerificationSerializer,
-                          PersonalInfoSerializer, SecuritySerializer, DangerZoneSerializer)
+                          PersonalInfoSerializer, SecuritySerializer, DangerZoneSerializer, CompetitionDetailSerializer)
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
@@ -171,6 +171,12 @@ class AccountViewSet(ViewSet):
 
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_description="Competition detail",
+        operation_id="Competition detail",
+        responses={200: CompetitionDetailSerializer()},
+        tags=["Account"],
+    )
     @action(detail=True, methods=["get"], url_path="competition")
     def competition_detail(self, request, pk=None):
         """

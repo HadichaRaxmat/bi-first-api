@@ -13,7 +13,6 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = ["payment_id", "price", "date_time", "payment_method"]
         read_only_fields = ["date_time", "payment_id", "payment_method"]
 
-    #  Возвращаем метод оплаты из Application
     def get_payment_method(self, obj):
         return obj.application.payment_method
 
