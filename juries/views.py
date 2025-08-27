@@ -6,6 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from competition.models import Competition
 from children.models import Children
 from .authentication import JuryJWTAuthentication
+from drf_yasg.utils import swagger_auto_schema
 from .serializers import (
     JuryLoginSerializer,
     JuryProfileSerializer,
@@ -13,7 +14,8 @@ from .serializers import (
     JurySecuritySerializer,
     JuryCompetitionsSerializer,
     CompetitionParticipantSerializer,
-    JuryGradeSerializer
+    JuryGradeSerializer,
+    JuryLogoutSerializer
     )
 
 
@@ -23,6 +25,12 @@ class JuryViewSet(ViewSet):
     authentication_classes = [JuryJWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Authenticate a jury",
+        request_body=JuryLoginSerializer,
+        responses={201: JuryLoginSerializer()},
+        tags=["Jury login"],
+    )
     @action(detail=False, methods=["post"], url_path="login", authentication_classes=[], permission_classes=[])
     def login(self, request):
         serializer = JuryLoginSerializer(data=request.data)
@@ -40,6 +48,12 @@ class JuryViewSet(ViewSet):
             "refresh": str(refresh),
         }, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_description="Jury profile",
+        request_body=JuryProfileSerializer,
+        responses={201: JuryProfileSerializer()},
+        tags=["Jury profile"],
+    )
     # --- Профиль ---
     @action(
         detail=False,
@@ -61,6 +75,12 @@ class JuryViewSet(ViewSet):
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(
+        operation_description="active competitions",
+        request_body=JuryCompetitionsSerializer,
+        responses={201: JuryCompetitionsSerializer()},
+        tags=["Jury profile"],
+    )
     # --- Competitions ---
     @action(detail=False, methods=["get"], url_path="competitions",
             permission_classes=[permissions.IsAuthenticated])
@@ -69,6 +89,12 @@ class JuryViewSet(ViewSet):
         serializer = JuryCompetitionsSerializer(competitions, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_description="competition detail",
+        request_body=JuryCompetitionDetailSerializer,
+        responses={201: JuryCompetitionDetailSerializer()},
+        tags=["Jury profile"],
+    )
     # --- Competition detail ---
     @action(detail=True, methods=["get"], url_path="competition",
             permission_classes=[permissions.IsAuthenticated])
@@ -81,6 +107,12 @@ class JuryViewSet(ViewSet):
         serializer = JuryCompetitionDetailSerializer(competition)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_description="competition participants",
+        request_body=CompetitionParticipantSerializer,
+        responses={201: CompetitionParticipantSerializer()},
+        tags=["Jury profile"],
+    )
     @action(detail=True, methods=["get"], url_path="participants",
             permission_classes=[permissions.IsAuthenticated])
     def competition_participants(self, request, pk=None):
@@ -94,6 +126,12 @@ class JuryViewSet(ViewSet):
         serializer = CompetitionParticipantSerializer(children, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_description="participant detail",
+        request_body=CompetitionParticipantSerializer,
+        responses={201: CompetitionParticipantSerializer()},
+        tags=["Jury profile"],
+    )
     @action(detail=True, methods=["get", "post"], url_path="participant",
             permission_classes=[permissions.IsAuthenticated])
     def participant_detail(self, request, pk=None, competition_pk=None):
@@ -134,6 +172,12 @@ class JuryViewSet(ViewSet):
 
 
     # --- Security (смена пароля) ---
+    @swagger_auto_schema(
+        operation_description="Jury security",
+        request_body=JurySecuritySerializer,
+        responses={201: JurySecuritySerializer()},
+        tags=["Jury profile"],
+    )
     @action(detail=False, methods=["post"], url_path="security",
             permission_classes=[permissions.IsAuthenticated])
     def security(self, request):
@@ -142,19 +186,27 @@ class JuryViewSet(ViewSet):
         serializer.save()
         return Response({"message": "Password changed successfully"})
 
+
     # --- Logout ---
+    @swagger_auto_schema(
+        operation_description="Jury logout",
+        request_body=JuryLogoutSerializer,
+        responses={200: "Logout successful"},
+        tags=["Jury profile"],
+    )
     @action(detail=False, methods=["post"], url_path="logout",
             permission_classes=[permissions.IsAuthenticated])
     def logout(self, request):
-        try:
-            refresh_token = request.data["refresh"]
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-            return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
-        except Exception:
-            return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = JuryLogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
     # --- Danger Zone (удаление аккаунта) ---
+    @swagger_auto_schema(
+        operation_description="Delete jury account",
+        request_body=None,
+        responses={204: "Account deleted"},
+        tags=["Jury profile"],
+    )
     @action(detail=False, methods=["delete"], url_path="danger-zone",
             permission_classes=[permissions.IsAuthenticated])
     def danger_zone(self, request):

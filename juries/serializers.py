@@ -109,3 +109,5 @@ class JuryGradeSerializer(serializers.ModelSerializer):
         return value
 
 
+class JuryLogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
