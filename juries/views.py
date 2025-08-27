@@ -49,18 +49,20 @@ class JuryViewSet(ViewSet):
         }, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        operation_description="Jury profile",
-        request_body=JuryProfileSerializer,
-        responses={201: JuryProfileSerializer()},
-        tags=["Jury profile"],
+        method='get',
+        operation_description="Get jury profile",
+        responses={200: JuryProfileSerializer()},
+        tags=["Jury profile"]
+    )
+    @swagger_auto_schema(
+        method='patch',
+        operation_description="Update jury profile",
+        request_body=JuryProfileSerializer,  # ✅ PATCH поддерживает request_body
+        responses={200: JuryProfileSerializer()},
+        tags=["Jury profile"]
     )
     # --- Профиль ---
-    @action(
-        detail=False,
-        methods=["get", "patch"],
-        url_path="profile",
-        permission_classes=[permissions.IsAuthenticated]
-    )
+    @action(detail=False, methods=["get", "patch"], url_path="profile", permission_classes=[permissions.IsAuthenticated])
     def profile(self, request):
         jury = request.user
 
@@ -76,9 +78,8 @@ class JuryViewSet(ViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
-        operation_description="active competitions",
-        request_body=JuryCompetitionsSerializer,
-        responses={201: JuryCompetitionsSerializer()},
+        operation_description="Active competitions",
+        responses={200: JuryCompetitionsSerializer(many=True)},
         tags=["Jury profile"],
     )
     # --- Competitions ---
@@ -90,9 +91,8 @@ class JuryViewSet(ViewSet):
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_description="competition detail",
-        request_body=JuryCompetitionDetailSerializer,
-        responses={201: JuryCompetitionDetailSerializer()},
+        operation_description="Get competition detail",
+        responses={200: JuryCompetitionDetailSerializer()},
         tags=["Jury profile"],
     )
     # --- Competition detail ---
@@ -108,9 +108,8 @@ class JuryViewSet(ViewSet):
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_description="competition participants",
-        request_body=CompetitionParticipantSerializer,
-        responses={201: CompetitionParticipantSerializer()},
+        operation_description="Get competition participants",
+        responses={200: CompetitionParticipantSerializer(many=True)},
         tags=["Jury profile"],
     )
     @action(detail=True, methods=["get"], url_path="participants",
@@ -126,10 +125,18 @@ class JuryViewSet(ViewSet):
         serializer = CompetitionParticipantSerializer(children, many=True)
         return Response(serializer.data)
 
+
     @swagger_auto_schema(
-        operation_description="participant detail",
-        request_body=CompetitionParticipantSerializer,
-        responses={201: CompetitionParticipantSerializer()},
+        method='get',
+        operation_description="Get participant detail",
+        responses={200: CompetitionParticipantSerializer()},
+        tags=["Jury profile"],
+    )
+    @swagger_auto_schema(
+        method='post',
+        operation_description="Add grade for participant",
+        request_body=JuryGradeSerializer,
+        responses={201: JuryGradeSerializer()},
         tags=["Jury profile"],
     )
     @action(detail=True, methods=["get", "post"], url_path="participant",
@@ -186,7 +193,6 @@ class JuryViewSet(ViewSet):
         serializer.save()
         return Response({"message": "Password changed successfully"})
 
-
     # --- Logout ---
     @swagger_auto_schema(
         operation_description="Jury logout",
@@ -200,10 +206,17 @@ class JuryViewSet(ViewSet):
         serializer = JuryLogoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        try:
+            refresh_token = serializer.validated_data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+        except Exception:
+            return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+
     # --- Danger Zone (удаление аккаунта) ---
     @swagger_auto_schema(
         operation_description="Delete jury account",
-        request_body=None,
         responses={204: "Account deleted"},
         tags=["Jury profile"],
     )
@@ -213,3 +226,4 @@ class JuryViewSet(ViewSet):
         jury = request.user
         jury.delete()
         return Response({"message": "Account deleted"}, status=status.HTTP_204_NO_CONTENT)
+
