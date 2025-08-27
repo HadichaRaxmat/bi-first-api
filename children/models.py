@@ -9,6 +9,7 @@ class Children(models.Model):
         DAUGHTER = "daughter", _("Daughter")
 
     parent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="children", verbose_name=_("Parent"))
+    image = models.ImageField(blank=True, null=True, verbose_name=_("Child Image"))
     first_name = models.CharField(max_length=255, verbose_name=_("First Name"))
     last_name = models.CharField(max_length=255, verbose_name=_("Last Name"))
     father_name = models.CharField(max_length=255, verbose_name=_("Father Name"))

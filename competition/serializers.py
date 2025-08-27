@@ -91,7 +91,3 @@ class CompetitionSubscriberSerializer(serializers.ModelSerializer):
             competition=validated_data['competition']
         )
         return subscription
-
-
-
-

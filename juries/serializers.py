@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import check_password
-from .models import AddJuries
+from .models import AddJury
 from django.contrib.auth.hashers import make_password
 from competition.models import Competition
+from juries.models import JuryGrade
+from children.models import Children
 
 class JuryLoginSerializer(serializers.Serializer):
     login = serializers.CharField()
@@ -13,8 +15,8 @@ class JuryLoginSerializer(serializers.Serializer):
         password = data.get("password")
 
         try:
-            jury = AddJuries.objects.get(login=login)
-        except AddJuries.DoesNotExist:
+            jury = AddJury.objects.get(login=login)
+        except AddJury.DoesNotExist:
             raise serializers.ValidationError("Неверный логин или пароль")
 
         # Проверка пароля (если хэширован через make_password)
@@ -28,25 +30,43 @@ class JuryLoginSerializer(serializers.Serializer):
 
 
 class JuryProfileSerializer(serializers.ModelSerializer):
+    """Профиль жюри (с возможностью частичного обновления)"""
     class Meta:
-        model = AddJuries
-        fields = [
-            "id", 'image', "first_name", "last_name", "birth_date",
-            "email", "phone_number"
-        ]
+        model = AddJury
+        fields = ["id", "image", "first_name", "last_name", "birth_date",
+                  "email", "phone_number"]
+        extra_kwargs = {
+            "email": {"required": False},
+            "phone_number": {"required": False},
+        }
 
 
-class JuriCompetitionResponseSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    competition = serializers.CharField()
+class JuryCompetitionsSerializer(serializers.ModelSerializer):
+    """Список активных конкурсов (только id + название)"""
+    class Meta:
+        model = Competition
+        fields = ["id", "title"]
+
 
 
 class JuryCompetitionDetailSerializer(serializers.ModelSerializer):
-    competition_title = serializers.CharField(source="title", read_only=True)
+    participants = serializers.SerializerMethodField()
 
     class Meta:
         model = Competition
         fields = ["id", "title", "end_date", "participants"]
+
+    def get_participants(self, obj):
+        # Берём всех детей, которые подали заявку на этот конкурс
+        children = Children.objects.filter(applications__competition=obj).distinct()
+        return CompetitionParticipantSerializer(children, many=True).data
+
+
+
+class CompetitionParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Children
+        fields = ["id", "first_name", "image"]
 
 
 class JurySecuritySerializer(serializers.Serializer):
@@ -76,3 +96,16 @@ class JurySecuritySerializer(serializers.Serializer):
         jury.password = make_password(self.validated_data['new_password'])
         jury.save()
         return jury
+
+
+class JuryGradeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JuryGrade
+        fields = ["id", "score", "comment"]
+
+    def validate_score(self, value):
+        if not 1 <= value <= 10:
+            raise serializers.ValidationError("Оценка должна быть от 1 до 10.")
+        return value
+
+
