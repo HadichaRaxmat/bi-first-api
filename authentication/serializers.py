@@ -4,7 +4,6 @@ from .models import User
 from django.contrib.auth import authenticate
 from .models import EmailVerification
 from .utils import send_verification_email
-from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth.hashers import check_password
 
@@ -240,6 +239,7 @@ class CompetitionDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Competition
         fields = ["id", "title", "about_competition", "end_date", "participants"]
+
 
 
 

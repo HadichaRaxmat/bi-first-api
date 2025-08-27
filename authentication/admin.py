@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from competition.models import Competition
-from .models import User, EmailVerification, AddJuries
+from .models import User, EmailVerification
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
@@ -32,10 +32,3 @@ class EmailVerificationAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "code", "expires_at")
 
 
-@admin.register(AddJuries)
-class AddJuriesAdmin(admin.ModelAdmin):
-    list_display = ("full_name", "birth_date", "work_place", "academic_degree", "profession")
-
-    def full_name(self, obj):
-        return f"{obj.first_name or ''} {obj.last_name or ''}".strip()
-    full_name.short_description = "Full Name"
