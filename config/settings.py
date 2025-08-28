@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     'children',
     'gallery',
     'payment',
-    'juries'
+    'juries',
+    'results'
 ]
 
 MIDDLEWARE = [
