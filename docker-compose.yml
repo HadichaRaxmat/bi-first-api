@@ -1,0 +1,40 @@
+services:
+  web:
+    build: .
+    container_name: be_first.wsgi
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file:
+      - .env
+
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+
+
+#   docker-compose down
+#   docker system prune -a
+#   docker-compose up --build
+
+#   docker-compose down -v  # Удалит все данные БД
+#   docker-compose up -d
+#   docker-compose  restart
+
+#  docker exec -it django_guarder python manage.py makemigrations blog
+#  docker exec -it django_guarder python manage.py migrate
