@@ -85,3 +85,7 @@ class SocialMedia(BaseModel):
         return f'{self.title}'
 
 
+class Policy(BaseModel):
+    title = models.ForeignKey(Title, on_delete=models.CASCADE, verbose_name=_('title'))
+    description = models.TextField(blank=True, null=True, verbose_name=_('description'))
+

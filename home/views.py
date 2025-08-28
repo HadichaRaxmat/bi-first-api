@@ -2,11 +2,12 @@ from rest_framework.viewsets import ViewSet
 from rest_framework import status
 from rest_framework.response import Response
 
-from .serializers import (HeaderSerializer, ContactUsSerializer, SubscribeSerializer, LocationSerializer, ContactNumberSerializer,
-                          SocialMediaSerializer)
+from .serializers import (HeaderSerializer, ContactUsSerializer, SubscribeSerializer, LocationSerializer,
+                          ContactNumberSerializer,
+                          SocialMediaSerializer, PolicySerializer)
 
 from drf_yasg.utils import swagger_auto_schema
-from .models import Header, ContactUs, Location, ContactNumber, SocialMedia
+from .models import Header, ContactUs, Location, ContactNumber, SocialMedia, Policy
 
 
 class HomeViewSet(ViewSet):
@@ -99,3 +100,14 @@ class SocialMediaViewSet(ViewSet):
         serializer = SocialMediaSerializer(social_media, many=True)
         return Response(serializer.data)
 
+class PolicyViewSet(ViewSet):
+    @swagger_auto_schema(
+        operation_description="List Policy",
+        operation_summary="List Policy",
+        responses={200: PolicySerializer(many=True)},
+        tags=['home']
+    )
+    def list(self, request):
+        policy = Policy.objects.all()
+        serializer = PolicySerializer(policy, many=True)
+        return Response(serializer.data)

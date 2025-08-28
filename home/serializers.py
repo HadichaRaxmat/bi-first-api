@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Header, Title, ContactUs, Subscribe, Location, ContactNumber, SocialMedia
+from .models import Header, Title, ContactUs, Subscribe, Location, ContactNumber, SocialMedia, Policy
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -57,3 +57,10 @@ class SocialMediaSerializer(serializers.ModelSerializer):
         model = SocialMedia
         fields = ['id', 'title', 'image', 'url']
 
+
+class PolicySerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source="title.title", read_only=True)
+    class Meta:
+        model = Policy
+        fields = ['id', 'title', 'description']
+        read_only_fields = ['id']
