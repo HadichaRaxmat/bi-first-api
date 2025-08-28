@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'juries',
     'results',
     'experts',
+    'about',
 ]
 
 MIDDLEWARE = [
