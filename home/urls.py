@@ -9,7 +9,6 @@ urlpatterns = [
     path('get_locations/', LocationViewSet.as_view({'get': 'list'}), name='home_location'),
     path('get_contact_numbers/', ContactNumberViewSet.as_view({'get': 'list'}), name='home_contact_numbers'),
     path('get_social_media/', SocialMediaViewSet.as_view({'get': 'list'}), name='home_social_media'),
-    path('results/', ResultViewSet.as_view({'get': 'list'}), name='home_results'),
     path('policy/', PolicyViewSet.as_view({'get': 'list'}), name='home_policy')
 
 ]
