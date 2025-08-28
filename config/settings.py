@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'gallery',
     'payment',
     'juries',
-    'results'
+    'results',
+    'experts',
 ]
 
 MIDDLEWARE = [

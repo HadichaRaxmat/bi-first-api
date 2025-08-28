@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import Re
+from .views import ResultViewSet
 
 urlpatterns = [
-    path('results/', ResultViewSet.as_view({'get': 'list'}), name='home_results'),
+    path('results/', ResultViewSet.as_view({'get': 'list'}), name='results'),
 ]
